@@ -1,6 +1,6 @@
 import os
 from time import time
-from storage import exp_finder, dict_split
+from laboratory.storage import exp_finder, dict_split
 import json
 import numpy as np
 
