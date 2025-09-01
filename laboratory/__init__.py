@@ -1,2 +1,2 @@
-from core import Experiment
-from storage import catalogue, math_to_python
+from laboratory.core import Experiment
+from laboratory.storage import catalogue, math_to_python
