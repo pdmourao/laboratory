@@ -196,7 +196,7 @@ class TAM:
                 J = (1 / (big_r * self.neurons)) * np.einsum('kl, kui, luj -> klij', self.g(self._lmb), eff_examples, eff_examples)
             else:
                 J = (1 / (big_r * self.neurons * self.m_per_layer)) * np.einsum('kl, kaui, lauj -> klij', self.g(self._lmb), eff_examples,
-                                                           eff_examples)
+                                                           eff_examples, optimize = True)
             for i in range(self.neurons):
                 for l in range(self.layers):
                     J[l, l, i, i] = 0
@@ -205,7 +205,7 @@ class TAM:
                 av_examples = np.mean(examples, axis = 0)
                 J = (1 / (big_r * self.neurons)) * np.einsum('ui, uj -> ij', av_examples, av_examples)
             else:
-                J = (1 / (big_r * self.neurons * self._m)) * np.einsum('aui, auj -> ij', examples, examples)
+                J = (1 / (big_r * self.neurons * self._m)) * np.einsum('aui, auj -> ij', examples, examples, optimize = True)
         return J
 
     def effective_examples(self, examples = None):
