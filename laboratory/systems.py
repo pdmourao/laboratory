@@ -280,7 +280,7 @@ class TAM:
             return (self._r / (self._neurons * big_r)) * np.einsum('li, lui -> lu', sigma, self._effective_examples[:,:cap])
         else:
             # is there a constant here?
-            return (1 / self._neurons) * np.einsum('li, alui -> alu', sigma, self._effective_examples[:,:,cap])
+            return (1 / self._neurons) * np.einsum('li, alui -> alu', sigma, self._effective_examples[:,:,:cap])
 
     # Method simulate runs the MonteCarlo simulation
     # It does L x neurons flips per iteration.
