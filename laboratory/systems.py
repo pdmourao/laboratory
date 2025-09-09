@@ -237,8 +237,8 @@ class TAM:
 
     def gen_examples(self, patterns):
         k = np.shape(patterns)[0]
-        blurs = self.noise_examples.choice([-1, 1], p=[(1 - self._r) / 2, (1 + self._r) / 2], size = (self._m, k, self._neurons))
-        return blurs * patterns
+        blurs = self.noise_examples.choice([-1, 1], p=[(1 - self._r) / 2, (1 + self._r) / 2], size = (k, self._m, self._neurons))
+        return np.transpose(blurs, [1,0,2]) * patterns
 
     # mixture state
     def mix(self, n = None):
