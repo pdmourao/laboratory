@@ -40,7 +40,7 @@ class TAM:
 
         # usage of SeedSequence objects allows for reproducibility
         # create one seed sequence for each independent source of randomness
-        rng_seeds = rng_ss.spawn(3)
+        rng_seeds = rng_ss.spawn(4)
 
         # fast noise uses a seed sequence, since simulate always starts from the initial state
         # in order to get independent runs of the same system, one should further spawn independent seeds from this
@@ -51,6 +51,7 @@ class TAM:
         # for reproducibility, one should always keep in mind the different seeds and where each one "starts"
         self.noise_patterns = np.random.default_rng(rng_seeds[1])
         self.noise_examples = np.random.default_rng(rng_seeds[2])
+        self.noise_initial = rng_seeds[3]
 
         self._neurons = neurons
         self._layers = layers
@@ -171,12 +172,6 @@ class TAM:
             self.set_interaction()
         self._k += k
 
-    # the initial state setter will allow us to choose initial states by their names
-    def state(self, name = None, **kwargs):
-        if name is None:
-            return np.zeros((self._layers, self._neurons))
-        else:
-            return name(**kwargs)
 
     # constructor of the interaction matrix (also used when patterns are added)
     # for cases where all layers are the same (ie rho = 0 or not-split), and lambda is not given, this is a neurons * neurons matrix
@@ -240,17 +235,35 @@ class TAM:
         blurs = self.noise_examples.choice([-1, 1], p=[(1 - self._r) / 2, (1 + self._r) / 2], size = (k, self._m, self._neurons))
         return np.transpose(blurs, [1,0,2]) * patterns
 
+    # allows us to choose initial states by their names
+    def set_initial(self, state = 'mix'):
+        if state == 'mix':
+            self.initial_state = self.mix()
+        elif state == 'dis':
+            self.initial_state = self.dis()
+        elif state == 'pure':
+            self.initial_state = self.pure()
+        elif state == 'random':
+            self.initial_state = self.random()
+
     # mixture state
-    def mix(self, n = None):
-        if n == 0:
-            return np.zeros((self._layers, self._neurons))
-        if n is None:
-            n = self._layers
-        return np.broadcast_to(np.sign(np.sum(self._patterns[:n], axis = 0)), (self._layers, self._neurons))
+    def mix(self):
+        return np.broadcast_to(np.sign(np.sum(self._patterns[:self._layers], axis = 0)), (self._layers, self._neurons))
 
     # disentangled state
     def dis(self):
         return self._patterns[:self._layers]
+
+    def pure(self, idx = 0):
+        return np.broadcast_to(self._patterns[idx], (self._layers, self._neurons))
+
+    def random(self, rng_ss = None):
+        if rng_ss is None:
+            rng_ss = self.noise_initial.spawn(1)[0]
+        return np.random.default_rng(rng_ss).choice([-1,1], (self._layers, self._neurons))
+
+    def zeros(self):
+        return np.zeros((self._layers, self._neurons))
 
     def g(self, lmb):
         return g(layers = self._layers, lmb = lmb)
