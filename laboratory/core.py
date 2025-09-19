@@ -99,6 +99,11 @@ class Experiment:
             np.savez(self._file_prefix+f'sample{sample}', *output)
         return output
 
+    def check(self, sample, *extra_args, **extra_kwargs):
+        output = self.func(entropy = (self._entropy, sample), checker = self.read_sample(sample), *self._args, *extra_args, **extra_kwargs, **self._kwargs)
+        return output
+
+
     # detect which samples are present
     def samples_present(self):
         assert self._file_prefix is not None, 'Method samples_present needs valid experiment.'
