@@ -59,7 +59,7 @@ def catalogue(directory, *args, file_spec ='', **kwargs):
                         verdict = False
 
             if verdict:
-                print(f'Experiment: {file_handle}')
+                print(f'\nExperiment: {file_handle}')
                 n_samples = len([sample for sample in os.listdir(directory) if file_handle+'_sample' in sample])
                 print(f'{n_samples} sample(s) found.')
                 for key, value in file_args.items():
