@@ -99,6 +99,9 @@ class Experiment:
             np.savez(self._file_prefix+f'sample{sample}', *output)
         return output
 
+    # check is used to check if re-running the experiment matches what is saved in the files
+    # assumes the experiment has an input "checker", used to input the saved values into the function
+    # that way we can compare at each iteration instead of waiting for the whole experiment to run
     def check(self, sample, *extra_args, **extra_kwargs):
         output = self.func(entropy = (self._entropy, sample), checker = self.read_sample(sample), *self._args, *extra_args, **extra_kwargs, **self._kwargs)
         return output

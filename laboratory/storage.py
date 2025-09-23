@@ -62,7 +62,11 @@ def catalogue(directory, *args, file_spec ='', **kwargs):
                 print(f'Experiment: {file_handle}')
                 n_samples = len([sample for sample in os.listdir(directory) if file_handle+'_sample' in sample])
                 print(f'{n_samples} sample(s) found.')
-                print(file_args)
+                for key, value in file_args.items():
+                    if isinstance(value, np.ndarray):
+                        print(f'{key} is an array of shape {np.shape(value)}')
+                    else:
+                        print(f'{key} = {value}')
 
 
 def exp_finder(directory, *args, file_spec ='', **kwargs):
