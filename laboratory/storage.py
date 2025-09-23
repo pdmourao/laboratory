@@ -63,8 +63,11 @@ def catalogue(directory, *args, file_spec ='', **kwargs):
                 n_samples = len([sample for sample in os.listdir(directory) if file_handle+'_sample' in sample])
                 print(f'{n_samples} sample(s) found.')
                 for key, value in file_args.items():
-                    if isinstance(value, np.ndarray):
-                        print(f'{key} is an array of shape {np.shape(value)}')
+                    if isinstance(value, np.ndarray) and len(np.shape(value)) > 0:
+                        if len(np.shape(value)) == 1:
+                            print(f'{key} is an array of length {np.shape(value)[0]}')
+                        else:
+                            print(f'{key} is an array of shape {np.shape(value)}')
                     else:
                         print(f'{key} = {value}')
 
