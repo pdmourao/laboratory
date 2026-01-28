@@ -142,7 +142,10 @@ class Experiment:
     def read(self, max_s = np.inf):
         output_list = [self.read_sample(sample) for sample in self.samples_present() if sample < max_s]
         print(f'{len(output_list)} sample(s) were found.')
-        return map(np.array, zip(*output_list))
+        if len(output_list[0]) > 1:
+            return map(np.array, zip(*output_list))
+        else:
+            return [output[0] for output in output_list]
 
     # read and average
     def read_av(self):
