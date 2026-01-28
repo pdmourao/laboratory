@@ -411,7 +411,7 @@ class TAM:
 
 class Dream:
 
-    def __init__(self, neurons, r, m, k = 0, supervised = False, rng_ss = np.random.SeedSequence()):
+    def __init__(self, neurons, r, m, k = 0, supervised = False, diagonal = False, rng_ss = np.random.SeedSequence()):
 
         # usage of SeedSequence objects allows for reproducibility
         # create one seed sequence for each independent source of randomness
@@ -440,15 +440,16 @@ class Dream:
         self._J = None
 
 
-        # type of learning
+        # type of learning and whether diagonal is included
         self._supervised = supervised
+        self._diagonal = diagonal
 
         # initializes the patterns and examples (see k setter)
         self.k = k
 
         # the initial state and external field to be used in simulate
         # defined manually outside the constructor
-        self.external_field = None
+        # self.external_field = None
         self.initial_state = None
 
     @property
@@ -478,6 +479,27 @@ class Dream:
     @property
     def k(self):
         return self._patterns.shape[0]
+
+    @property
+    def supervised(self):
+        return self._supervised
+
+    @property
+    def diagonal(self):
+        return self._diagonal
+
+    @supervised.setter
+    def supervised(self, supervised):
+        self._supervised = supervised
+        self.set_interaction()
+
+    @diagonal.setter
+    def diagonal(self, diagonal):
+        self._diagonal = diagonal
+        if diagonal:
+            np.fill_diagonal(self._J, self.k / self.neurons)
+        else:
+            np.fill_diagonal(self._J, 0)
 
     # Changes the number of patterns by either generating new patterns and examples or removing them
     # Updates interaction matrix accordingly, only if it is already defined
@@ -515,15 +537,12 @@ class Dream:
             J = 1 / c * np.einsum('ui, uj -> ij', av_examples, av_examples)
         else:
             J = 1 / c * np.einsum('aui, auj -> ij', examples, examples, optimize = True)
-
-        for i in range(self.neurons):
-            J[i, i] = 0
+        if not self._diagonal:
+            np.fill_diagonal(J, 0)
         return J
 
     # constructor of the interaction matrix
-    def set_interaction(self, supervised = None):
-        if supervised is not None:
-            self._supervised = supervised
+    def set_interaction(self):
         self._J = self.interaction(self.examples)
 
     # generates patterns
