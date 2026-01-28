@@ -97,7 +97,10 @@ class Experiment:
     def run(self, sample, *extra_args, save = True, **extra_kwargs):
         output = self.func(entropy = (self._entropy, sample), *self._args, *extra_args, **extra_kwargs, **self._kwargs)
         if sample not in self.samples_present() and self._file_prefix is not None and save:
-            np.savez(self._file_prefix+f'sample{sample}', *output)
+            if isinstance(output, tuple):
+                np.savez(self._file_prefix+f'sample{sample}', *output)
+            else:
+                np.savez(self._file_prefix + f'sample{sample}', output)
         return output
 
     def run_to(self, samples, *extra_args, save = True, **extra_kwargs):
