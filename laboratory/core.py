@@ -74,7 +74,8 @@ class Experiment:
             except IndexError:
                 self._file_prefix = None
                 self._entropy = np.random.SeedSequence().entropy
-                print('Experiment not found for given inputs.')
+                print('Experiment not found for given inputs. Creating.')
+                self.create()
 
     # call the class to create a new experiment, i.e. save the input files
     def create(self):
@@ -98,6 +99,12 @@ class Experiment:
         if sample not in self.samples_present() and self._file_prefix is not None and save:
             np.savez(self._file_prefix+f'sample{sample}', *output)
         return output
+
+    def run_to(self, samples, *extra_args, save = True, **extra_kwargs):
+        output_list = [self.run(sample, *extra_args, save = save, **extra_kwargs)
+                       for sample in self.samples_missing(samples)]
+        return output_list
+
 
     # check is used to check if re-running the experiment matches what is saved in the files
     # assumes the experiment has an input "checker", used to input the saved values into the function
