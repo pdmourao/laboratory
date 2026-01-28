@@ -514,7 +514,6 @@ class Dream:
             av_examples = np.mean(self._examples, axis = 0)
             J = 1 / c * np.einsum('ui, uj -> ij', av_examples, av_examples)
         else:
-            print(np.shape(examples))
             J = 1 / c * np.einsum('aui, auj -> ij', examples, examples, optimize = True)
 
         for i in range(self.neurons):
@@ -525,7 +524,6 @@ class Dream:
     def set_interaction(self, supervised = None):
         if supervised is not None:
             self._supervised = supervised
-        print(self.examples)
         self._J = self.interaction(self.examples)
 
     # generates patterns
