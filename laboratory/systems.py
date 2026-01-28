@@ -411,7 +411,7 @@ class TAM:
 
 class Dream:
 
-    def __init__(self, neurons, supervised, r, m, k = 0, rng_ss = np.random.SeedSequence()):
+    def __init__(self, neurons, r, m, k = 0, supervised = False, rng_ss = np.random.SeedSequence()):
 
         # usage of SeedSequence objects allows for reproducibility
         # create one seed sequence for each independent source of randomness
