@@ -546,6 +546,14 @@ class Dream:
         else:
             return blurs[0] * states
 
+    def state(self, keyword):
+        if keyword == 'arc':
+            return self.patterns
+        elif keyword == 'ex':
+            return self.examples
+        else:
+            raise f'State {keyword} invalid.'
+
     # Method simulate runs the MonteCarlo simulation for 0 temperature
     # It does neurons flips per iteration.
     # Each of these neurons flips is one call of the function "dynamics_simple_noh" (defined above)
