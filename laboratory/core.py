@@ -145,7 +145,7 @@ class Experiment:
         if len(output_list[0]) > 1:
             return map(np.array, zip(*output_list))
         else:
-            return [output[0] for output in output_list]
+            return np.array([output[0] for output in output_list])
 
     # read and average
     def read_av(self):
