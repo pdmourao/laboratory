@@ -433,18 +433,18 @@ class Dream:
         self._r = r
         self._m = m
 
+        # interaction matrix and examples
+        # examples get defined when k is changed
+        # J is defined outside with set_interaction
         self._examples = None
+        self._J = None
+
 
         # type of learning
         self._supervised = supervised
 
         # initializes the patterns and examples (see k setter)
         self.k = k
-
-        # interaction matrix and effective examples
-        # effective examples are the examples above but split among layers (if split) and average among examples (if supervised)
-        # gets defined when interaction matrix does (see set_interaction)
-        self._J = None
 
         # the initial state and external field to be used in simulate
         # defined manually outside the constructor
@@ -499,6 +499,9 @@ class Dream:
                 if self._J is not None:
                     self.set_interaction()
 
+        else:
+            self._patterns = self.gen_patterns(k)
+            self._examples = self.gen_examples(self._patterns)
 
     # computes interaction matrix for a given set of examples
     # the reason this method and set_interaction are not the same method is for this one to be used for the extra patterns in add_patterns
@@ -511,6 +514,7 @@ class Dream:
             av_examples = np.mean(self._examples, axis = 0)
             J = 1 / c * np.einsum('ui, uj -> ij', av_examples, av_examples)
         else:
+            print(np.shape(examples))
             J = 1 / c * np.einsum('aui, auj -> ij', examples, examples, optimize = True)
 
         for i in range(self.neurons):
@@ -518,10 +522,11 @@ class Dream:
         return J
 
     # constructor of the interaction matrix
-    def set_interaction(self, lmb = None, split = None, supervised = None):
+    def set_interaction(self, supervised = None):
         if supervised is not None:
             self._supervised = supervised
-        self._J = self.interaction()
+        print(self.examples)
+        self._J = self.interaction(self.examples)
 
     # generates patterns
     def gen_patterns(self, k):
