@@ -109,3 +109,9 @@ def math_to_python(file, directory = None):
         data = np.transpose(np.reshape(np.fromfile(f, dtype=np.dtype('float64'),
                                                    count=reduce(lambda x, y: x * y, dims)), dims))
     return data
+
+
+def sanity_check(*args, checker = None, idx = None):
+    if checker is not None:
+        for idx_result, result in enumerate(checker):
+            assert np.array_equal(args[idx_result][idx], result[idx]), f'Check {idx_result} failed.'
