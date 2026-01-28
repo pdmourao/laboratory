@@ -54,7 +54,8 @@ def dynamics(beta, J, h, sigma, dynamic, dyn_rng):
         else:
             raise Exception('No valid dynamic update rule given.')
 
-def dynamics_simple_noH(beta, J, sigma, dynamic, dyn_rng):
+
+def dynamics_simple_noh(beta, J, sigma, dynamic, dyn_rng):
 
     if dynamic == 'parallel':
         if np.isinf(beta):
@@ -432,6 +433,8 @@ class Dream:
         self._r = r
         self._m = m
 
+        self._examples = None
+
         # type of learning
         self._supervised = supervised
 
@@ -442,8 +445,6 @@ class Dream:
         # effective examples are the examples above but split among layers (if split) and average among examples (if supervised)
         # gets defined when interaction matrix does (see set_interaction)
         self._J = None
-        self._effective_examples = None
-
 
         # the initial state and external field to be used in simulate
         # defined manually outside the constructor
@@ -478,6 +479,8 @@ class Dream:
     def k(self):
         return self._patterns.shape[0]
 
+    # Changes the number of patterns by either generating new patterns and examples or removing them
+    # Updates interaction matrix accordingly, only if it is already defined
     @k.setter
     def k(self, k):
         assert isinstance(k, int), 'Number of patterns must be an integer.'
@@ -497,7 +500,7 @@ class Dream:
                     self.set_interaction()
 
 
-    # constructor of the interaction matrix
+    # computes interaction matrix for a given set of examples
     # the reason this method and set_interaction are not the same method is for this one to be used for the extra patterns in add_patterns
     # that way we have an easy way to save time if iterating through alpha
     def interaction(self, examples = None):
@@ -514,16 +517,17 @@ class Dream:
             J[i, i] = 0
         return J
 
-
+    # constructor of the interaction matrix
     def set_interaction(self, lmb = None, split = None, supervised = None):
         if supervised is not None:
             self._supervised = supervised
         self._J = self.interaction()
 
-
+    # generates patterns
     def gen_patterns(self, k):
         return self.noise_patterns.choice([-1, 1], (k, self._neurons))
 
+    # generates examples
     def gen_examples(self, patterns):
         # the order of generation and transposition are to force the same examples to be generated regardless of
         # how k is changed
@@ -534,80 +538,40 @@ class Dream:
 
         return np.transpose(blurs, [1, 0, 2]) * patterns
 
-    def gen_samples(self, states, n, p):
+
+    def gen_samples(self, states, p, n=1):
         blurs = self.noise_examples.choice([-1, 1], p=[(1 - p) / 2, (1 + p) / 2], size=(n,) + np.shape(states))
-        return blurs * states
-
-    def mattis(self, sigma, k):
-        return (1 / self._neurons) * np.einsum('li, ui -> lu', sigma, self._patterns[k])
-
-    def ex_mags(self, sigma, cap = None):
-        if cap is None:
-            cap = self._layers
-        if self._supervised:
-            big_r = self._r ** 2 + (1 - self._r ** 2) / self.m_per_layer
-            return (self._r / (self._neurons * big_r)) * np.einsum('li, lui -> lu', sigma, self._effective_examples[:,:cap])
+        if n > 1:
+            return blurs * states
         else:
-            # is there a constant here?
-            return (1 / self._neurons) * np.einsum('li, aui -> alu', sigma, self._examples[:,:cap])
+            return blurs[0] * states
 
-    # Method simulate runs the MonteCarlo simulation
-    # It does L x neurons flips per iteration.
-    # Each of these L x neurons flips is one call of the function "dynamics" (defined above)
+    # Method simulate runs the MonteCarlo simulation for 0 temperature
+    # It does neurons flips per iteration.
+    # Each of these neurons flips is one call of the function "dynamics_simple_noh" (defined above)
     # At each iteration it appends the new state a list
     # It loops until a maximum number of iterations is reached
     # Or until the standard deviation in the last av_counter magnetizations is below a certain threshold
 
     # INPUTS:
     # max_it is the maximum number of iterations
-    # beta is the inverse temperature
-    # dynamic is either 'parallel' or 'sequential' (see function dynamics)
-    # H is the strength of the external field (the external field already exists in self.h)
-    # lmb is the value of lambda, in case the interaction matrix does not have it yet
-    # error is the threshold for the standard deviation to assert convergence
-    # av_counter is the  number of iterations used in the standard deviation / convergence test
-    # av = True takes the average of the last av_counter iterations before returning, otherwise it returns the full history
+    # error is the threshold for difference between the last state and the one before
+    # this is measured from 0 (same state) to 1 (symmetric states)
 
-    # It returns the full history of magnetizations
-    def simulate(self, beta, max_it, dynamic, error, av_counter, h_norm, sim_J = None, av = True, sim_rng = None):
-        assert self.initial_state is not None, 'Initial state not provided.'
-        assert self.external_field is not None, 'External field not provided.'
-
-        if av_counter == 1 and error > 0:
-            print('Warning: av_counter set to 1 with positive error')
-
-        if sim_rng is None:
-            dyn_rng = np.random.default_rng(self.fast_noise.spawn(1)[0])
-        else:
-            dyn_rng = np.random.default_rng(sim_rng)
-
-        if sim_J is None:
-            assert self._lmb >= 0, r'\lambda not available to simulate.'
-            sim_J = self._J
+    # It returns the last state and the full history of errors
+    def simulate_zero_T(self, max_it, error=0):
 
         state = self.initial_state
 
-        mags = [self.mattis(state)]
-        ex_mags = [self.ex_mags(state)]
+        errors = []
+        while len(errors) < max_it: # do the simulation
 
-        idx = 0
-        while idx < max_it: # do the simulation
-            idx += 1
+            old_state = state
+            state = np.sign(state @ self.J)
 
-            state = dynamics(beta = beta, J = sim_J, h = h_norm * self.external_field, sigma = state, dynamic = dynamic, dyn_rng = dyn_rng)
+            this_error = (1-np.mean(state * old_state))/2
+            errors.append(this_error)
+            if this_error <= error:
+                break
 
-            mags.append(self.mattis(state))
-            ex_mags.append(self.ex_mags(state))
-            if idx + 1 >= av_counter: # size of the actual arrays has +1 since they include initial states
-                if av_counter > 1:
-                    last_error = np.max(np.std(mags[-av_counter:], axis=0))
-                else:
-                    last_error = np.max(np.abs(mags[-1]-mags[-2]))
-                if last_error <= error:
-                    break
-
-        if av:
-            mags = np.mean(mags[-av_counter:], axis = 0)
-            ex_mags = np.mean(ex_mags[-av_counter:], axis=0)
-
-        return mags, ex_mags, idx
+        return state, errors
