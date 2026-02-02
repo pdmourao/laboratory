@@ -428,7 +428,7 @@ class Dream:
         self.noise_examples = np.random.default_rng(rng_seeds[2])
         self.noise_initial = rng_seeds[3]
 
-        self.entropy = rng_seeds.entropy
+        self.entropy = rng_ss.entropy
 
         self._neurons = neurons
 
