@@ -411,10 +411,13 @@ class TAM:
 
 class Dream:
 
-    def __init__(self, neurons, r, m, k = 0, supervised = False, diagonal = False, rng_ss = np.random.SeedSequence()):
+    def __init__(self, neurons, r, m, k = 0, supervised = False, diagonal = False, rng_ss = None):
 
         # usage of SeedSequence objects allows for reproducibility
         # create one seed sequence for each independent source of randomness
+        if rng_ss is None:
+            rng_ss = np.random.SeedSequence()
+
         rng_seeds = rng_ss.spawn(4)
 
         # fast noise uses a seed sequence, since simulate always starts from the initial state
