@@ -609,4 +609,4 @@ class Dream:
             if this_error <= error:
                 break
 
-        return state, errors
+        return state, np.array(errors)
