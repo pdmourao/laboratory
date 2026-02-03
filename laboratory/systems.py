@@ -599,6 +599,7 @@ class Dream:
         state = self.initial_state
 
         errors = []
+        idxs = tuple([np.empty(0) for _ in np.shape(state)])
         while len(errors) < max_it: # do the simulation
 
             old_state = state
@@ -606,11 +607,12 @@ class Dream:
 
             this_error = (1-np.mean(state * old_state))/2
             diff = state - old_state
+            prev_idxs = idxs
             idxs = np.nonzero(diff)
             print(idxs)
             print(diff[idxs])
             errors.append(this_error)
-            if this_error <= error:
+            if this_error <= error or all([np.array_equal(x,y) for x, y in zip(idxs,prev_idxs)]):
                 break
 
         return state, np.array(errors)
