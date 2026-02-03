@@ -605,6 +605,10 @@ class Dream:
             state = np.sign(state @ self.J)
 
             this_error = (1-np.mean(state * old_state))/2
+            diff = state - old_state
+            idxs = np.nonzero(diff)
+            print(idxs)
+            print(diff[idxs])
             errors.append(this_error)
             if this_error <= error:
                 break
