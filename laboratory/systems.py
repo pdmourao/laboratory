@@ -573,10 +573,12 @@ class Dream:
         else:
             return blurs[0] * states
 
-    def state(self, keyword):
+    def state(self, keyword, reduced = False):
         if keyword == 'arc':
             return self.patterns
-        elif keyword == 'ex':
+        elif keyword == 'ex' and reduced:
+            return self.examples[0]
+        elif keyword == 'ex' and not reduced:
             return self.examples
         else:
             raise f'State {keyword} invalid.'
