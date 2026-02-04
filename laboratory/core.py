@@ -75,7 +75,6 @@ class Experiment:
                 self._file_prefix = None
                 self._entropy = np.random.SeedSequence().entropy
                 print('Experiment not found for given inputs.')
-                self.create()
 
     # call the class to create a new experiment, i.e. save the input files
     def create(self):
