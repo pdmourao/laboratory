@@ -573,13 +573,15 @@ class Dream:
         else:
             return blurs[0] * states
 
-    def state(self, keyword, reduced = False):
-        if keyword == 'arc':
+    def state(self, keyword, reduced = None):
+        if keyword == 'arc' and (reduced == 'partial' or reduced is None):
             return self.patterns
-        elif keyword == 'ex' and reduced:
-            return self.examples[0]
-        elif keyword == 'ex' and not reduced:
+        elif keyword == 'arc' and reduced == 'full':
+            return self.patterns[0]
+        elif keyword == 'ex' and reduced is None:
             return self.examples
+        elif keyword == 'ex' and (reduced == 'full' or reduced == 'partial'):
+            return self.examples[0]
         else:
             raise f'State {keyword} invalid.'
 
@@ -615,4 +617,4 @@ class Dream:
             if this_error <= error or all([np.array_equal(x,y) for x, y in zip(idxs,prev_idxs)]):
                 break
 
-        return state, np.array(errors)
+        return state, errors
