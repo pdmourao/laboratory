@@ -548,18 +548,22 @@ class Dream:
     def interaction(self, examples = None):
         if examples is None:
             examples = self._examples
-        c = self._m * self._neurons
         if self._supervised:
-            av_examples = np.mean(self._examples, axis = 0)
             if self._t == 0:
-                J = 1 / c * np.einsum('ui, uj -> ij', av_examples, av_examples)
+                J = 1 / self._neurons * np.transpose(np.mean(self._examples, axis = 0)) @ np.mean(self._examples, axis = 0)
             else:
-                J = None
+                J = 1 / self._neurons * np.transpose(np.mean(self._examples, axis = 0)) @ ((1+self.t) * np.linalg.inv(np.eye(self.k) + self.t * np.mean(self._examples, axis = 0) @ np.transpose(np.mean(self._examples, axis = 0)))) @ np.mean(self._examples, axis = 0)
         else:
+            c = self._m * self._neurons
             if self._t == 0:
-                J = 1 / c * np.einsum('aui, auj -> ij', examples, examples, optimize = True)
+                J = (1 / c *
+                     np.transpose(examples.reshape((self._m * self.k, self._neurons))) @
+                     examples.reshape((self._m * self.k, self._neurons)))
             else:
-                J = None
+                J = ((1+self._t) / c *
+                     np.transpose(examples.reshape((self._m * self.k, self._neurons))) @
+                     np.linalg.inv(np.eye(self._m * self.k) + self._t * examples.reshape((self._m * self.k, self._neurons)) @ np.transpose(examples.reshape((self._m * self.k, self._neurons)))) @
+                     examples.reshape((self._m * self.k, self._neurons)))
         if not self._diagonal:
             np.fill_diagonal(J, 0)
         return J
