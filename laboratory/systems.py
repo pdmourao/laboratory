@@ -411,7 +411,7 @@ class TAM:
 
 class Dream:
 
-    def __init__(self, neurons, r, m, k = 0, supervised = False, diagonal = False, rng_ss = None):
+    def __init__(self, neurons, r, m, k = 0, t = 0, supervised = False, diagonal = False, rng_ss = None):
 
         # usage of SeedSequence objects allows for reproducibility
         # create one seed sequence for each independent source of randomness
@@ -448,6 +448,7 @@ class Dream:
         # type of learning and whether diagonal is included
         self._supervised = supervised
         self._diagonal = diagonal
+        self._t = t
 
         # initializes the patterns and examples (see k setter)
         self.k = k
@@ -490,12 +491,21 @@ class Dream:
         return self._supervised
 
     @property
+    def t(self):
+        return self._t
+
+    @property
     def diagonal(self):
         return self._diagonal
 
     @supervised.setter
     def supervised(self, supervised):
         self._supervised = supervised
+        self.set_interaction()
+
+    @t.setter
+    def t(self, t):
+        self._t = t
         self.set_interaction()
 
     @diagonal.setter
@@ -517,8 +527,10 @@ class Dream:
                 extra_examples = self.gen_examples(extra_patterns)
                 self._patterns = np.concatenate((self._patterns, extra_patterns))
                 self._examples = np.concatenate((self._examples, extra_examples), axis=1)
-                if self._J is not None:
+                if self._J is not None and self._t == 0:
                     self._J = self._J + self.interaction(extra_examples)
+                elif self._J is not None and self._t > 0:
+                    self.set_interaction()
 
             else:
                 self._patterns = self._patterns[:k]
@@ -539,9 +551,15 @@ class Dream:
         c = self._m * self._neurons
         if self._supervised:
             av_examples = np.mean(self._examples, axis = 0)
-            J = 1 / c * np.einsum('ui, uj -> ij', av_examples, av_examples)
+            if self._t == 0:
+                J = 1 / c * np.einsum('ui, uj -> ij', av_examples, av_examples)
+            else:
+                J = None
         else:
-            J = 1 / c * np.einsum('aui, auj -> ij', examples, examples, optimize = True)
+            if self._t == 0:
+                J = 1 / c * np.einsum('aui, auj -> ij', examples, examples, optimize = True)
+            else:
+                J = None
         if not self._diagonal:
             np.fill_diagonal(J, 0)
         return J
