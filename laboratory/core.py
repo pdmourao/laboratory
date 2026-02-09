@@ -82,7 +82,7 @@ class Experiment:
             print('Creating new experiment...')
             kwargs_json, kwargs_num = dict_split(**self._kwargs)
 
-            inputs_file = os.path.join(self._directory, f'{self.func.__name__}-{int(time())}_inputs.npz')
+            inputs_file = os.path.join(self._directory, f'{self.func.__name__}-{self._entropy}_inputs.npz')
             self._file_prefix = inputs_file[:-10]
 
             with open(f'{inputs_file[:-3]}json', mode="w", encoding="utf-8") as json_file:
