@@ -562,7 +562,7 @@ class Dream:
             else:
                 J = ((1+self._t) / c *
                      np.transpose(examples.reshape((self._m * self.k, self._neurons))) @
-                     np.linalg.inv(np.eye(self._m * self.k) + self._t * examples.reshape((self._m * self.k, self._neurons)) @ np.transpose(examples.reshape((self._m * self.k, self._neurons)))) @
+                     np.linalg.inv(np.eye(self._m * self.k) + self._t / (self._neurons * self._m) * examples.reshape((self._m * self.k, self._neurons)) @ np.transpose(examples.reshape((self._m * self.k, self._neurons)))) @
                      examples.reshape((self._m * self.k, self._neurons)))
         if not self._diagonal:
             np.fill_diagonal(J, 0)
