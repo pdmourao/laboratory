@@ -602,10 +602,12 @@ class Dream:
             return self.patterns[0]
         elif keyword == 'ex' and reduced is None:
             return self.examples
-        elif keyword == 'ex' and (reduced == 'full' or reduced == 'partial'):
+        elif keyword == 'ex' and reduced == 'partial':
             return self.examples[0]
+        elif keyword == 'ex' and reduced == 'full':
+            return self.examples[0,0]
         else:
-            raise f'State {keyword} invalid.'
+            raise f'State should be either \'arc\' or \'ex\' and reduced should be either \'full\', \'partial\' or None.'
 
     # Method simulate runs the MonteCarlo simulation for 0 temperature
     # It does neurons flips per iteration.
