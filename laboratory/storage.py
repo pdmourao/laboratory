@@ -72,7 +72,7 @@ def catalogue(directory, *args, file_spec ='', **kwargs):
                         print(f'{key} = {value}')
 
 
-def exp_finder(directory, *args, file_spec ='', **kwargs):
+def exp_finder(directory, *args, file_spec ='', deterministic = False, **kwargs):
 
     kwargs_json, kwargs_num = dict_split(*args, **kwargs)
     file_list = []
@@ -87,7 +87,8 @@ def exp_finder(directory, *args, file_spec ='', **kwargs):
                     np.testing.assert_equal(dict(np_data), kwargs_num)
                     with open(json_file_os, mode="r", encoding="utf-8") as json_file:
                         json_data = json.load(json_file)
-                        json_data.pop('entropy')
+                        if not deterministic:
+                            json_data.pop('entropy')
                         verdict = json_data == kwargs_json
                 except AssertionError:
                     verdict = False
