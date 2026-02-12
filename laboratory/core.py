@@ -153,7 +153,7 @@ class Experiment:
 
 def prediction(func, directory, *args, **kwargs):
 
-    input_files = exp_finder(directory=directory, file_spec=func.__name__, *args, **kwargs)
+    input_files = exp_finder(directory=directory, file_spec=func.__name__, deterministic = True, *args, **kwargs)
     if len(input_files) > 1:
         print(f'Warning: {len(input_files)} prediction(s) found for given inputs.')
         print(f'{input_files[0]} will be used.')
