@@ -149,3 +149,36 @@ class Experiment:
     # read and average
     def read_av(self):
         return tuple([np.mean(output, axis =0) for output in self.read()])
+
+
+def prediction(func, directory, *args, **kwargs):
+
+    input_files = exp_finder(directory=directory, file_spec=func.__name__, *args, **kwargs)
+    if len(input_files) > 1:
+        print(f'Warning: {len(input_files)} prediction(s) found for given inputs.')
+        print(f'{input_files[0]} will be used.')
+
+    # finds existent experiment
+    try:
+        inputs_file = input_files[0]
+        print('Arguments found!')
+        file_prefix = inputs_file[:-10]
+
+    except IndexError:
+        print('Creating new prediction...')
+        kwargs_json, kwargs_num = dict_split(**kwargs)
+        entropy = np.random.SeedSequence().entropy
+        inputs_file = os.path.join(directory, f'{func.__name__}-{entropy}_inputs.npz')
+        file_prefix = inputs_file[:-10]
+
+        with open(f'{inputs_file[:-3]}json', mode="w", encoding="utf-8") as json_file:
+            json.dump(kwargs_json, json_file)
+        np.savez(inputs_file, *args, **kwargs_num)
+
+    filename = file_prefix + f'prediction.npy'
+    try:
+        predict = np.load(filename)
+    except FileNotFoundError:
+        predict = func(*args, **kwargs)
+        np.save(filename, predict)
+    return predict
