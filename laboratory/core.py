@@ -61,7 +61,8 @@ class Experiment:
             input_files = exp_finder(directory=directory, file_spec = self.func.__name__, *self._args, **self._kwargs)
             if len(input_files) > 1:
                 print(f'Warning: {len(input_files)} experiment(s) found for given inputs.')
-                print(f'{input_files[0]} will be used.')
+                for file in input_files:
+                    print(file)
 
             # finds existent experiment
             try:
