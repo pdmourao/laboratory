@@ -152,9 +152,14 @@ class Experiment:
         return tuple([np.mean(output, axis =0) for output in self.read()])
 
 
-def prediction(func, directory, *args, **kwargs):
+def prediction(func, directory, *args, vec = None, **kwargs):
 
-    input_files = exp_finder(directory=directory, file_spec=func.__name__, deterministic = True, *args, **kwargs)
+    if vec is None:
+        file_spec = func.__name__
+    else:
+        file_spec = f'{vec.__name__}_{func.__name__}'
+
+    input_files = exp_finder(directory=directory, file_spec=file_spec, deterministic = True, *args, **kwargs)
     if len(input_files) > 1:
         print(f'Warning: {len(input_files)} prediction(s) found for given inputs.')
         for file in input_files:
@@ -170,7 +175,7 @@ def prediction(func, directory, *args, **kwargs):
         print('Creating new prediction...')
         kwargs_json, kwargs_num = dict_split(**kwargs)
         entropy = np.random.SeedSequence().entropy
-        inputs_file = os.path.join(directory, f'{func.__name__}-{entropy}_inputs.npz')
+        inputs_file = os.path.join(directory, f'{file_spec}-{entropy}_inputs.npz')
         file_prefix = inputs_file[:-10]
 
         with open(f'{inputs_file[:-3]}json', mode="w", encoding="utf-8") as json_file:
@@ -181,6 +186,9 @@ def prediction(func, directory, *args, **kwargs):
     try:
         predict = np.load(filename)
     except FileNotFoundError:
-        predict = func(*args, **kwargs)
+        if vec is None:
+            predict = func(*args, **kwargs)
+        else:
+            predict = vec(func = func, *args, **kwargs)
         np.save(filename, predict)
     return predict
