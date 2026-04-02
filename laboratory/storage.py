@@ -31,11 +31,8 @@ def dict_split(*args, **kwargs):
 
 
 def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
-    print(kwargs)
     kwargs_json, kwargs_num = dict_split(*args, **kwargs)
-    print(kwargs_num)
     for file in os.listdir(directory):
-        print(kwargs_num)
         if 'inputs.npz' in file and file_spec in file:
             file_handle = file[:-11]
             npz_file_os = os.path.join(directory, file)
@@ -55,11 +52,11 @@ def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
             with np.load(npz_file_os) as data:
                 for key, value in data.items():
                     file_args[key] = value
-                print(kwargs_num)
                 for key, value in kwargs_num.items():
-                    print(key)
-                    print(data)
-                    if not np.array_equal(data[key], value):
+                    try:
+                        if not np.array_equal(data[key], value):
+                            verdict = False
+                    except KeyError:
                         verdict = False
 
             if verdict:
