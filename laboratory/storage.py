@@ -121,6 +121,7 @@ def delete(directory, id):
     num_npz = 0
     num_json = 0
     num_samples = 0
+    num_pred = 0
     for file in os.listdir(directory):
 
         if 'inputs.npz' in file and str(id) in file:
@@ -129,8 +130,12 @@ def delete(directory, id):
             num_json += 1
         if 'sample' in file and str(id) in file:
             num_samples += 1
+        if 'pred' in file and str(id) in file:
+            num_pred += 1
     assert num_npz == num_json, f'{num_npz} numerical input files found and {num_json} jsons.'
     print(f'Found {num_npz} corresponding experiments with {num_samples} samples.')
+    if num_pred > 0:
+        print(f'It has {num_pred} predictions.')
     dlt = None
     while dlt is None:
         val = input('Really delete (y/n): ')
@@ -144,14 +149,7 @@ def delete(directory, id):
             print('Invalid input.')
 
     if dlt:
-        for file in os.listdir(directory):
-            if 'inputs.npz' in file and str(id) in file:
-                num_npz += 1
-            if 'inputs.json' in file and str(id) in file:
-                num_json += 1
-            if 'sample' in file and str(id) in file:
-                num_samples += 1
-
+        out = False
         for file in os.listdir(directory):
             if 'inputs.npz' in file and str(id) in file:
                 os.remove(os.path.join(directory, file))
@@ -159,14 +157,34 @@ def delete(directory, id):
                 os.remove(os.path.join(directory, file))
             if 'sample' in file and str(id) in file:
                 os.remove(os.path.join(directory, file))
+            if 'predictions' in file and str(id) in file:
+                os.remove(os.path.join(directory, file))
 
-        if num_npz == 0 and num_json == 0 and num_samples == 0:
-            print('Experiment deleted.')
-        else:
+        out = True
+        for file in os.listdir(directory):
+            if str(id) in file:
+                out = False
+                break
+
+        if not out:
             print('Something went wrong with deletion.')
+            for file in os.listdir(directory):
+
+                if 'inputs.npz' in file and str(id) in file:
+                    num_npz += 1
+                if 'inputs.json' in file and str(id) in file:
+                    num_json += 1
+                if 'sample' in file and str(id) in file:
+                    num_samples += 1
+                if 'pred' in file and str(id) in file:
+                    num_pred += 1
             print(f'{num_npz} corresponding experiments still found together with {num_samples} samples.')
+            if num_pred > 0:
+                print(f'It has {num_pred} predictions.')
             if num_npz != num_json:
                 print(f'{num_npz} numerical input files left and {num_json} jsons.')
+        else:
+            print('Experiment deleted.')
 
 
 
