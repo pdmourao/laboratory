@@ -31,7 +31,7 @@ def dict_split(*args, **kwargs):
 
 
 def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
-
+    print(kwargs)
     kwargs_json, kwargs_num = dict_split(*args, **kwargs)
     print(kwargs_num)
     for file in os.listdir(directory):
