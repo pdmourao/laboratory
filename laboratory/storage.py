@@ -75,7 +75,7 @@ def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
 def compare(directory, id, *args, **kwargs):
     kwargs_json, kwargs_num = dict_split(*args, **kwargs)
     for file in os.listdir(directory):
-        if 'inputs.npz' in file and file_spec in file:
+        if 'inputs.npz' in file and str(id) in file:
             file_handle = file[:-11]
             npz_file_os = os.path.join(directory, file)
             json_file_os = os.path.join(directory, file[:-3] + 'json')
