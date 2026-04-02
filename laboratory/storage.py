@@ -2,6 +2,7 @@ import os
 import numpy as np
 import json
 from functools import reduce
+import shutil
 
 # we use both json and npz files for inputs, depending on whether they are numeric, or string/bool, respectively
 # the first two functions handle that separation
@@ -46,8 +47,12 @@ def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
                 for key, value in data.items():
                     file_args[key] = value
                 for key, value in kwargs_json.items():
-                    if data[key] != value and data[key] != list(value):  # to allow for different iterables
-                        verdict = False
+                    if data[key] != value:
+                        try:
+                            if data[key] != list(value): # to allow for different iterables
+                                verdict = False
+                        except TypeError:
+                            verdict = False
 
             with np.load(npz_file_os) as data:
                 for key, value in data.items():
@@ -88,9 +93,14 @@ def compare(directory, id, *args, **kwargs):
                 for key, value in data.items():
                     file_args[key] = value
                 for key, value in kwargs_json.items():
-                    if data[key] != value and data[key] != list(value):  # to allow for different iterables
-                        print(f'Comparison failed for {key} key, between {data[key]} and {value}.')
-                        verdict = False
+                    if data[key] != value:
+                        try:
+                            if data[key] != list(value):  # to allow for different iterables
+                                verdict = False
+                                print(f'Comparison failed for {key} key, between {data[key]} and {value}.')
+                        except TypeError:
+                            verdict = False
+                            print(f'Comparison failed for {key} key, between {data[key]} and {value}.')
 
             with np.load(npz_file_os) as data:
                 for key, value in data.items():
@@ -193,9 +203,13 @@ def delete(directory, *ids):
         if fully_out:
             print('Experiment(s) deleted.')
 
-
-
-
+def copy(directory, destination, *ids):
+    for id in ids:
+        for file in os.listdir(directory):
+            if str(id) in file:
+                current = os.path.join(directory, file)
+                final = os.path.join(destination, file)
+                shutil.copyfile(current, final)
 
 
 def exp_finder(directory, *args, file_spec ='', deterministic = False, **kwargs):
