@@ -130,7 +130,7 @@ def delete(directory, id):
             num_json += 1
         if 'sample' in file and str(id) in file:
             num_samples += 1
-        if 'pred' in file and str(id) in file:
+        if 'prediction' in file and str(id) in file:
             num_pred += 1
     assert num_npz == num_json, f'{num_npz} numerical input files found and {num_json} jsons.'
     print(f'Found {num_npz} corresponding experiments with {num_samples} samples.')
@@ -149,7 +149,6 @@ def delete(directory, id):
             print('Invalid input.')
 
     if dlt:
-        out = False
         for file in os.listdir(directory):
             if 'inputs.npz' in file and str(id) in file:
                 os.remove(os.path.join(directory, file))
@@ -180,7 +179,7 @@ def delete(directory, id):
                     num_json += 1
                 if 'sample' in file and str(id) in file:
                     num_samples += 1
-                if 'pred' in file and str(id) in file:
+                if 'prediction' in file and str(id) in file:
                     num_pred += 1
             print(f'{num_npz} corresponding experiments still found together with {num_samples} samples.')
             if num_pred > 0:
