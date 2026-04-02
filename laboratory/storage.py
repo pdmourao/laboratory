@@ -55,6 +55,8 @@ def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
                 for key, value in data.items():
                     file_args[key] = value
                 for key, value in kwargs_num.items():
+                    print(key)
+                    print(data)
                     if not np.array_equal(data[key], value):
                         verdict = False
 
