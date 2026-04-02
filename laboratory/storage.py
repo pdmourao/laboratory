@@ -54,6 +54,7 @@ def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
             with np.load(npz_file_os) as data:
                 for key, value in data.items():
                     file_args[key] = value
+                print(kwargs_num)
                 for key, value in kwargs_num.items():
                     print(key)
                     print(data)
