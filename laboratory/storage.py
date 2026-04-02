@@ -30,7 +30,7 @@ def dict_split(*args, **kwargs):
     return kwargs_json, kwargs_num
 
 
-def catalogue(directory, *args, file_spec ='', **kwargs):
+def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
 
     kwargs_json, kwargs_num = dict_split(*args, **kwargs)
 
@@ -63,7 +63,7 @@ def catalogue(directory, *args, file_spec ='', **kwargs):
                 n_samples = len([sample for sample in os.listdir(directory) if file_handle+'_sample' in sample])
                 print(f'{n_samples} sample(s) found.')
                 for key, value in file_args.items():
-                    if isinstance(value, np.ndarray) and len(np.shape(value)) > 0:
+                    if isinstance(value, np.ndarray) and len(np.shape(value)) > 0 and not full_prints:
                         if len(np.shape(value)) == 1:
                             print(f'{key} is an array of length {np.shape(value)[0]}')
                         else:
