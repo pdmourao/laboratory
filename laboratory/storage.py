@@ -72,6 +72,51 @@ def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
                     else:
                         print(f'{key} = {value}')
 
+def compare(directory, id, *args, **kwargs):
+    kwargs_json, kwargs_num = dict_split(*args, **kwargs)
+    for file in os.listdir(directory):
+        if 'inputs.npz' in file and file_spec in file:
+            file_handle = file[:-11]
+            npz_file_os = os.path.join(directory, file)
+            json_file_os = os.path.join(directory, file[:-3] + 'json')
+
+            verdict = True
+            file_args = {}
+
+            with open(json_file_os, mode="r", encoding="utf-8") as json_file:
+                data = json.load(json_file)
+                for key, value in data.items():
+                    file_args[key] = value
+                for key, value in kwargs_json.items():
+                    if data[key] != value and data[key] != list(value):  # to allow for different iterables
+                        print(f'Comparison failed for {key} key, between {data[key]} and {value}.')
+                        verdict = False
+
+            with np.load(npz_file_os) as data:
+                for key, value in data.items():
+                    file_args[key] = value
+                for key, value in kwargs_num.items():
+                    try:
+                        if not np.array_equal(data[key], value):
+                            print(f'Comparison failed for {key} key, between {data[key]} and {value}.')
+                            verdict = False
+                    except KeyError:
+                        print(f'{key} key does not exist in the file.')
+                        verdict = False
+
+            if verdict:
+                print(f'\nExperiment: {file_handle}')
+                n_samples = len([sample for sample in os.listdir(directory) if file_handle+'_sample' in sample])
+                print(f'{n_samples} sample(s) found.')
+                for key, value in file_args.items():
+                    if isinstance(value, np.ndarray) and len(np.shape(value)) > 0 and not full_prints:
+                        if len(np.shape(value)) == 1:
+                            print(f'{key} is an array of length {np.shape(value)[0]}')
+                        else:
+                            print(f'{key} is an array of shape {np.shape(value)}')
+                    else:
+                        print(f'{key} = {value}')
+
 
 def exp_finder(directory, *args, file_spec ='', deterministic = False, **kwargs):
 
