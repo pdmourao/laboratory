@@ -157,7 +157,7 @@ def delete(directory, id):
                 os.remove(os.path.join(directory, file))
             if 'sample' in file and str(id) in file:
                 os.remove(os.path.join(directory, file))
-            if 'predictions' in file and str(id) in file:
+            if 'prediction' in file and str(id) in file:
                 os.remove(os.path.join(directory, file))
 
         out = True
@@ -168,6 +168,10 @@ def delete(directory, id):
 
         if not out:
             print('Something went wrong with deletion.')
+            num_npz = 0
+            num_json = 0
+            num_samples = 0
+            num_pred = 0
             for file in os.listdir(directory):
 
                 if 'inputs.npz' in file and str(id) in file:
