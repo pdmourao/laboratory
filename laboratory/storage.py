@@ -117,6 +117,61 @@ def compare(directory, id, *args, **kwargs):
                     else:
                         print(f'{key} = {value}')
 
+def delete(directory, id):
+    num_npz = 0
+    num_json = 0
+    num_samples = 0
+    for file in os.listdir(directory):
+
+        if 'inputs.npz' in file and str(id) in file:
+            num_npz += 1
+        if 'inputs.json' in file and str(id) in file:
+            num_json += 1
+        if 'sample' in file and str(id) in file:
+            num_samples += 1
+    assert num_npz == num_json, f'{num_npz} numerical input files found and {num_json} jsons.'
+    print(f'Found {num_npz} corresponding experiments with {num_samples} samples.')
+    dlt = None
+    while dlt is None:
+        val = input('Really delete (y/n): ')
+        if val.lower() == 'y':
+            dlt = True
+            break
+        elif val.lower() == 'n':
+            dlt = False
+            break
+        else:
+            print('Invalid input.')
+
+    if dlt:
+        for file in os.listdir(directory):
+            if 'inputs.npz' in file and str(id) in file:
+                num_npz += 1
+            if 'inputs.json' in file and str(id) in file:
+                num_json += 1
+            if 'sample' in file and str(id) in file:
+                num_samples += 1
+
+        for file in os.listdir(directory):
+            if 'inputs.npz' in file and str(id) in file:
+                os.remove(os.path.join(directory, file))
+            if 'inputs.json' in file and str(id) in file:
+                os.remove(os.path.join(directory, file))
+            if 'sample' in file and str(id) in file:
+                os.remove(os.path.join(directory, file))
+
+        if num_npz == 0 and num_json == 0 and num_samples == 0:
+            print('Experiment deleted.')
+        else:
+            print('Something went wrong with deletion.')
+            print(f'{num_npz} corresponding experiments still found together with {num_samples} samples.')
+            if num_npz != num_json:
+                print(f'{num_npz} numerical input files left and {num_json} jsons.')
+
+
+
+
+
 
 def exp_finder(directory, *args, file_spec ='', deterministic = False, **kwargs):
 
