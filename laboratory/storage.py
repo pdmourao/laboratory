@@ -47,12 +47,15 @@ def catalogue(directory, *args, file_spec ='', full_prints = False, **kwargs):
                 for key, value in data.items():
                     file_args[key] = value
                 for key, value in kwargs_json.items():
-                    if data[key] != value:
-                        try:
-                            if data[key] != list(value): # to allow for different iterables
+                    try:
+                        if data[key] != value:
+                            try:
+                                if data[key] != list(value): # to allow for different iterables
+                                    verdict = False
+                            except TypeError:
                                 verdict = False
-                        except TypeError:
-                            verdict = False
+                    except KeyError:
+                        verdict = False
 
             with np.load(npz_file_os) as data:
                 for key, value in data.items():
